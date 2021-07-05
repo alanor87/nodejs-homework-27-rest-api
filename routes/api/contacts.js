@@ -12,8 +12,14 @@ const {
 
 const newContactSchema = Joi.object({
   name: Joi.string().required(),
-  email: Joi.string().pattern(/^.+[@].+$/),
+  email: Joi.string().pattern(/^.+[@].+$/).required(),
   phone: Joi.string().pattern(/^\(\d+\) \d+-\d+$/).required()
+})
+
+const updateContactSchema = Joi.object({
+  name: Joi.string(),
+  email: Joi.string().pattern(/^.+[@].+$/),
+  phone: Joi.string().pattern(/^\(\d+\) \d+-\d+$/)
 })
 
 router.get('/', async (req, res, next) => {
@@ -38,16 +44,21 @@ router.post('/', async (req, res, next) => {
 })
 
 router.patch('/:contactId', async (req, res, next) => {
-  if (req.body.name && req.body.email && req.body.phone) {
-    const updateStatus = await updateContact(req.params.contactId, req.body)
-    if (updateStatus) {
-      res.status(201).send(updateStatus);
-      return;
-    }
+  if (Object.keys(req.body).length === 0) {
+    res.status(400).send({ message: 'missing fields' });
+    return;
+  }
+  const { error } = updateContactSchema.validate(req.body);
+  if (error) {
+    res.status(400).send({ message: 'Not valid info' });
+    return;
+  }
+  const updateStatus = await updateContact(req.params.contactId, req.body)
+  if (!updateStatus) {
     res.status(201).send({ message: 'Not found' });
     return;
   }
-  res.status(400).send({ message: 'missing fields' })
+  res.status(201).send(updateStatus);
 })
 
 router.delete('/:contactId', async (req, res, next) => {
