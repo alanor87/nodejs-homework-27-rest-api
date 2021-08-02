@@ -10,6 +10,7 @@ mongoose
     useUnifiedTopology: true,
     useFindAndModify: false,
   })
+  .then(console.log('DB is connected'))
   .then(() => {
     app.listen(PORT);
     console.log(`Listening at PORT ${PORT}`);
