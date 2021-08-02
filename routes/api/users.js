@@ -75,8 +75,8 @@ router.post('/login', validateUserStatus, async (req, res, next) => {
 
 router.post('/logout',
     authenticate,
-    (req, res) => {
-        service.updateById(req.user._id, { token: null });
+    async (req, res) => {
+        await service.updateById(req.user._id, { token: null });
         res.json({
             code: 204,
             status: "No content",

@@ -11,7 +11,7 @@ const validate = (schema, body, next) => {
         return next({
             status: "error",
             code: 400,
-            message: "missing field in new user registration request",
+            message: "missing field",
         });
     }
     next();
