@@ -3,6 +3,7 @@ const Joi = require("joi");
 const userCreateSchema = Joi.object({
     email: Joi.string().required(),
     password: Joi.string().required(),
+    PushSubscription: Joi.string(),
 });
 
 const validate = (schema, body, next) => {
@@ -11,7 +12,7 @@ const validate = (schema, body, next) => {
         return next({
             status: "error",
             code: 400,
-            message: "missing field",
+            message: "missing field!",
         });
     }
     next();

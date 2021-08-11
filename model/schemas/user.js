@@ -1,4 +1,5 @@
 const { Schema } = require('mongoose');
+const gravatar = require('gravatar');
 const bcrypt = require('bcrypt');
 
 const userSchema = Schema({
@@ -16,6 +17,7 @@ const userSchema = Schema({
         enum: ["starter", "pro", "business"],
         default: "starter"
     },
+    avatarURL: String,
     token: {
         type: String,
         default: null,
@@ -23,12 +25,15 @@ const userSchema = Schema({
 });
 
 userSchema.methods.setPassword = function (password) {
-    console.log(password);
     this.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
 }
 
 userSchema.methods.comparePassword = function (password) {
     return bcrypt.compareSync(password, this.password);
+}
+
+userSchema.methods.generateAvatar = function (email) {
+    this.avatarURL = gravatar.url(email)
 }
 
 

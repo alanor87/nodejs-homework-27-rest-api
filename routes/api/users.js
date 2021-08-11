@@ -2,6 +2,11 @@ const router = require('express').Router();
 const { validateUserStatus } = require('../../utils/validate/user');
 const { User: service } = require('../../services');
 const authenticate = require('../../middleware/authenticate')
+const { avatarUpload } = require('../../middleware/avatar');
+const path = require('path');
+const fs = require('fs/promises');
+const { uploadDir } = require('../../middleware/avatar');
+const { avatarResize } = require('../../middleware/avatarResize');
 const jwt = require('jsonwebtoken');
 
 
@@ -72,6 +77,20 @@ router.post('/login', validateUserStatus, async (req, res, next) => {
         next(error);
     }
 });
+
+router.patch('/avatar', authenticate, avatarUpload.single('avatar'), async (req, res, err) => {
+    const { path: tempName, originalname } = req.file;
+    avatarResize(tempName);
+    const useDirectory = path.join(uploadDir);
+    try {
+        const fileName = path.join(useDirectory, req.user._id + originalname);
+        fs.rename(tempName, fileName);
+        res.send(fileName);
+    }
+    catch (error) {
+        fs.unlink(tempName);
+    }
+})
 
 router.post('/logout',
     authenticate,
