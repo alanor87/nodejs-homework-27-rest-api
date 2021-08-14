@@ -5,8 +5,8 @@ const getOne = async (filter) => {
     return await User.findOne(filter);
 }
 
-const addOne = ({ email, password }) => {
-    const newUser = new User({ email, password });
+const addOne = ({ email, password, subscription, verifyToken }) => {
+    const newUser = new User({ email, password, subscription, verifyToken });
     newUser.setPassword(password);
     newUser.generateAvatar(email);
     return newUser.save();
@@ -16,9 +16,8 @@ const getById = (id) => {
     return User.findById(id);
 }
 
-const updateById = (id, updateInfo) => {
-    console.log(id, updateInfo);
-    return User.findByIdAndUpdate(id, updateInfo)
+const updateById = async (id, updateInfo) => {
+    return await User.findByIdAndUpdate(id, updateInfo)
 }
 
 module.exports = { getOne, addOne, getById, updateById };

@@ -15,13 +15,21 @@ const userSchema = Schema({
     subscription: {
         type: String,
         enum: ["starter", "pro", "business"],
-        default: "starter"
+        default: "starter",
     },
     avatarURL: String,
     token: {
         type: String,
         default: null,
     },
+    verifyToken: {
+        type: String,
+        required: [true, 'Verify token is required'],
+    },
+    verify: {
+        type: Boolean,
+        default: false,
+    }
 });
 
 userSchema.methods.setPassword = function (password) {

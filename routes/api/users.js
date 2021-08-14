@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs/promises');
 const { uploadDir } = require('../../middleware/avatar');
 const { avatarResize } = require('../../middleware/avatarResize');
+const { sendVerificationEmail } = require('../../middleware/verificationEmail');
 const jwt = require('jsonwebtoken');
 
 
@@ -21,22 +22,37 @@ router.get('/current',
         })
     })
 
-router.post('/signup', validateUserStatus, async (req, res, next) => {
-    const { email, password, subscription } = req.body;
+router.get('/verify/:verifyToken',
+    async (req, res) => {
+        const user = await service.getOne({ verifyToken: req.params.verifyToken });
+        if (!user) res.status(404).send('User not found');
+        await service.updateById(user._id, { verifyToken: null, verify: true })
+        console.log(user);
+        res.status(200).send('Verification successful');
+    })
+
+router.post('/signup', validateUserStatus, sendVerificationEmail, async (req, res, next) => {
+    const { email, password, subscription, verifyToken } = req.body;
     const result = await service.getOne({ email: email });
-    if (!result) {
-        service.addOne({ email, password, subscription });
-        res.json({
-            "Status": 201,
-            "Content-Type": "application/json",
-            body: {
-                user: {
-                    email, subscription
+    try {
+        if (!result) {
+            service.addOne({ email, password, subscription, verifyToken });
+            res.json({
+                "Status": 201,
+                "Content-Type": "application/json",
+                body: {
+                    user: {
+                        email, subscription
+                    }
                 }
-            }
-        });
-        return;
+            });
+            return;
+        }
     }
+    catch (error) {
+        res.send(error.message);
+    }
+
     res.json({
         status: 500,
         message: "Email already exists!",
@@ -54,6 +70,9 @@ router.post('/login', validateUserStatus, async (req, res, next) => {
                     code: 400,
                     message: 'Email or password is wrong',
                 })
+        }
+        if (!user.verify) {
+            res.send('Your accoung is not yet being verified!')
         }
         const { SECRET_KEY } = process.env;
         const payload = {

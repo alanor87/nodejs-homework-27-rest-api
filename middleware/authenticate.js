@@ -15,6 +15,7 @@ const authenticate = (req, res, next) => {
             });
         }
 
+        console.log(user.verify);
         req.user = user;
         return next();
     })(req, res, next);
