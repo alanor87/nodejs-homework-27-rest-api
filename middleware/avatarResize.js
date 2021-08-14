@@ -1,5 +1,4 @@
 const jimp = require('jimp');
-const { tempDir } = require('../middleware/avatar');
 
 const avatarResize = (fileOrigin) => {
     jimp.read(fileOrigin, (err, file) => {
